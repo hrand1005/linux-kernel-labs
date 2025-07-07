@@ -8,14 +8,15 @@ ZIMAGE = $(KDIR)/arch/$(ARCH)/boot/$(b)zImage
 KCONFIG = $(KDIR)/.config
 NTTCP = $(KDIR)/tools/labs/templates/assignments/6-e100/nttcp
 
-YOCTO_URL = http://downloads.yoctoproject.org/releases/yocto/yocto-2.3/machines/qemu/qemu$(ARCH)/
-YOCTO_IMAGE = core-image-minimal-qemu$(ARCH).ext4
-#YOCTO_IMAGE = core-image-minimal-dev-qemu$(ARCH).ext4
+YOCTO_URL = http://downloads.yoctoproject.org/releases/yocto/yocto-5.2/machines/qemu/qemu$(ARCH)/
+#YOCTO_IMAGE = core-image-minimal-qemu$(ARCH).rootfs.ext4
+#YOCTO_IMAGE = core-image-minimal-dev-qemu$(ARCH).rootfs.ext4
 #YOCTO_IMAGE = core-image-sato-dev-qemu$(ARCH).ext4
-#YOCTO_IMAGE = core-image-sato-qemu$(ARCH).ext4
+YOCTO_IMAGE = core-image-sato-qemu$(ARCH).rootfs.ext4
 #YOCTO_IMAGE = core-image-sato-sdk-qemu$(ARCH).ext4
 
 QEMU_OPTS = -kernel $(ZIMAGE) \
+	-enable-kvm -cpu host \
 	-device virtio-serial \
 	-chardev pty,id=virtiocon0 -device virtconsole,chardev=virtiocon0 \
 	-serial pipe:pipe1 -serial pipe:pipe2 \
@@ -24,16 +25,12 @@ QEMU_OPTS = -kernel $(ZIMAGE) \
 	-drive file=$(YOCTO_IMAGE),if=virtio,format=raw \
 	-drive file=disk1.img,if=virtio,format=raw \
 	-drive file=disk2.img,if=virtio,format=raw \
+	-drive file=mydisk.img,if=virtio,format=raw \
 	--append "root=/dev/vda loglevel=15 console=hvc0 pci=noacpi" \
 	--display $(QEMU_DISPLAY) -s -m 256
 
-ifdef ENABLE_KVM
-QEMU_OPTS += -enable-kvm -cpu host
-ENABLE_KVM_SUDO = sudo
-endif
-
 boot: .modinst lkt-tap0 lkt-tap1 pipe1.in pipe1.out pipe2.in pipe2.out disk1.img disk2.img nttcp-run
-	$(ENABLE_KVM_SUDO) ARCH=$(ARCH) qemu/qemu.sh $(QEMU_OPTS)
+	sudo ARCH=$(ARCH) qemu/qemu.sh $(QEMU_OPTS)
 
 TEMPDIR := $(shell mktemp -u)
 

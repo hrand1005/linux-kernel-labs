@@ -82,12 +82,24 @@ lx-symbols command."""
         self.module_files_updated = True
 
     def _get_module_file(self, module_name):
-        module_pattern = ".*/{0}\.ko(?:.debug)?$".format(
-            module_name.replace("_", r"[_\-]"))
+        # Replace underscores with a pattern that matches both '_' and '-'
+        mod_name_pattern = module_name.replace("_", r"[_\-]")
+        # Use raw string for the regex pattern and escape dots properly
+        module_pattern = rf".*/{mod_name_pattern}\.ko(?:\.debug)?$"
+
         for name in self.module_files:
             if re.match(module_pattern, name) and os.path.exists(name):
                 return name
         return None
+
+    # NOTE: replaced with the above due to a warning
+    # def _get_module_file(self, module_name):
+    #     module_pattern = ".*/{0}\.ko(?:.debug)?$".format(
+    #         module_name.replace("_", r"[_\-]"))
+    #     for name in self.module_files:
+    #         if re.match(module_pattern, name) and os.path.exists(name):
+    #             return name
+    #     return None
 
     def _section_arguments(self, module):
         try:
