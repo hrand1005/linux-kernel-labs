@@ -5,6 +5,7 @@ serial.pts
 rootfs.img
 disk1.img
 disk2.img
+mydisk.img
 /*core-image-*.ext4
 /*core-image-*.bz2
 .modinst
